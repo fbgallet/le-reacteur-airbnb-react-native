@@ -26,7 +26,7 @@ export default function SignUpScreen({ setToken, navigation }) {
         );
         console.log("Signin - data >>>", data);
         if (data.token) {
-          setToken(data.token);
+          setToken(data.token, data.id);
           alert("Connexion réussie !");
         }
       } else {

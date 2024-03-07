@@ -20,15 +20,19 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [userToken, setUserToken] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-  const setToken = async (token) => {
+  const setToken = async (token, id) => {
     if (token) {
       await AsyncStorage.setItem("userToken", token);
+      await AsyncStorage.setItem("userId", id);
     } else {
       await AsyncStorage.removeItem("userToken");
+      await AsyncStorage.removeItem("userId", id);
     }
 
-    setUserToken(token);
+    setUserToken(token || null);
+    setUserId(id || null);
   };
 
   useEffect(() => {
@@ -36,10 +40,11 @@ export default function App() {
     const bootstrapAsync = async () => {
       // We should also handle error for production apps
       const userToken = await AsyncStorage.getItem("userToken");
-
+      const userId = await AsyncStorage.getItem("userId");
       // This will switch to the App screen or Auth screen and this loading
       // screen will be unmounted and thrown away.
       setUserToken(userToken);
+      setUserId(userId);
 
       setIsLoading(false);
     };
@@ -99,15 +104,6 @@ export default function App() {
                       <Stack.Screen name="room">
                         {(props) => <RoomScreen {...props} />}
                       </Stack.Screen>
-
-                      <Stack.Screen
-                        name="Profile"
-                        options={{
-                          title: "User Profile",
-                        }}
-                      >
-                        {() => <ProfileScreen />}
-                      </Stack.Screen>
                     </Stack.Navigator>
                   )}
                 </Tab.Screen>
@@ -143,26 +139,40 @@ export default function App() {
                   )}
                 </Tab.Screen>
                 <Tab.Screen
-                  name="TabSettings"
+                  name="TabProfile"
                   options={{
-                    tabBarLabel: "Settings",
+                    headerShown: true,
+                    headerTitle: () => <Header />,
+                    tabBarLabel: "Profile",
                     tabBarIcon: ({ color, size }) => (
-                      <Ionicons name={"settings"} size={size} color={color} />
+                      <Ionicons
+                        name={"person-outline"}
+                        size={size}
+                        color={color}
+                      />
                     ),
                   }}
                 >
-                  {() => (
+                  {(props) => (
+                    <ProfileScreen
+                      {...props}
+                      setToken={setToken}
+                      userToken={userToken}
+                      userId={userId}
+                    />
+                  )}
+                  {/* {() => (
                     <Stack.Navigator>
                       <Stack.Screen
-                        name="Settings"
+                        name="Profile"
                         options={{
-                          title: "Settings",
+                          title: "User Profile",
                         }}
                       >
-                        {() => <SettingsScreen setToken={setToken} />}
+                        
                       </Stack.Screen>
                     </Stack.Navigator>
-                  )}
+                  )} */}
                 </Tab.Screen>
               </Tab.Navigator>
             )}
